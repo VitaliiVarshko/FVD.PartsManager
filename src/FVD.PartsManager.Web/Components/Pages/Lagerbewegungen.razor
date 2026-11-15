@@ -1,0 +1,317 @@
+
+@page "/lagerbewegungen"
+@rendermode InteractiveServer
+
+@using FVD.PartsManager.Web.Models
+@using FVD.PartsManager.Web.Services
+
+@inject ArtikelService ArtikelService
+@inject LagerbewegungService LagerbewegungService
+
+<PageTitle>Lagerbewegungen | FVD Parts Manager</PageTitle>
+
+<div class="page-header">
+    <div>
+        <div class="section-caption">WARENVERWALTUNG / HAUPTLAGER</div>
+        <h1>Lagerbewegungen</h1>
+        <p>Wareneingänge und Warenausgänge verwalten</p>
+    </div>
+
+    <button type="button"
+            class="btn btn-danger"
+            disabled="@(ArtikelListe.Count == 0)"
+            @onclick="NeueBewegungOeffnen">
+        + Neue Lagerbewegung
+    </button>
+</div>
+
+<div class="movement-panel">
+    <div class="panel-toolbar">
+        <div>
+            <strong>Bewegungshistorie</strong>
+            <span class="movement-count">
+                @Bewegungen.Count Buchungen
+            </span>
+        </div>
+    </div>
+
+    @if (Laden)
+    {
+        <div class="state-message">
+            Lagerbewegungen werden geladen...
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Fehlermeldung))
+    {
+        <div class="alert alert-danger m-3">
+            @Fehlermeldung
+        </div>
+    }
+    else if (Bewegungen.Count == 0)
+    {
+        <div class="state-message">
+            Noch keine Lagerbewegungen vorhanden.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Artikelnummer</th>
+                        <th>Bezeichnung</th>
+                        <th>Bewegungsart</th>
+                        <th class="text-end">Menge</th>
+                        <th>Bemerkung</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var bewegung in Bewegungen)
+                    {
+                        <tr @key="bewegung.Id">
+                            <td>
+                                @bewegung.Datum.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                            </td>
+
+                            <td class="article-number">
+                                @bewegung.Artikel.Artikelnummer
+                            </td>
+
+                            <td>@bewegung.Artikel.Bezeichnung</td>
+
+                            <td>
+                                @if (bewegung.Bewegungsart == Bewegungsart.Eingang)
+                                {
+                                    <span class="badge bg-success">
+                                        Wareneingang
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        Warenausgang
+                                    </span>
+                                }
+                            </td>
+
+                            <td class="text-end fw-bold">
+                                @(bewegung.Bewegungsart == Bewegungsart.Eingang ? "+" : "-")@bewegung.Menge
+                            </td>
+
+                            <td>@bewegung.Bemerkung</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@if (FormularAnzeigen)
+{
+    <div class="modal-overlay">
+        <div class="movement-modal"
+             role="dialog"
+             aria-modal="true"
+             aria-label="Neue Lagerbewegung">
+
+            <div class="modal-header-custom">
+                <h2>Neue Lagerbewegung</h2>
+
+                <button type="button"
+                        class="btn-close"
+                        aria-label="Schließen"
+                        disabled="@Speichern"
+                        @onclick="FormularSchliessen">
+                </button>
+            </div>
+
+            <EditForm Model="@Formular"
+                      OnValidSubmit="BewegungSpeichern"
+                      FormName="LagerbewegungForm">
+
+                <div class="modal-body-custom">
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-3">
+                        <label class="form-label">Artikel *</label>
+
+                        <InputSelect class="form-select"
+                                     @bind-Value="Formular.ArtikelId">
+                            <option value="0">Artikel auswählen...</option>
+
+                            @foreach (var artikel in ArtikelListe)
+                            {
+                                <option value="@artikel.Id">
+                                    @artikel.Artikelnummer – @artikel.Bezeichnung
+                                    (Bestand: @artikel.Lagerbestand)
+                                </option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Bewegungsart *</label>
+
+                        <InputSelect class="form-select"
+                                     @bind-Value="Formular.Bewegungsart">
+                            <option value="@Bewegungsart.Eingang">Wareneingang</option>
+                            <option value="@Bewegungsart.Ausgang">Warenausgang</option>
+                        </InputSelect>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Menge *</label>
+
+                        <InputNumber class="form-control"
+                                     min="1"
+                                     @bind-Value="Formular.Menge" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Bemerkung</label>
+
+                        <InputTextArea class="form-control"
+                                       rows="3"
+                                       maxlength="500"
+                                       @bind-Value="Formular.Bemerkung" />
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(FormularFehler))
+                    {
+                        <div class="alert alert-danger">
+                            @FormularFehler
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer-custom">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            disabled="@Speichern"
+                            @onclick="FormularSchliessen">
+                        Abbrechen
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-danger"
+                            disabled="@Speichern">
+                        @(Speichern ? "Buchen..." : "Buchung speichern")
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Artikel> ArtikelListe = [];
+    private List<Lagerbewegung> Bewegungen = [];
+
+    private bool Laden = true;
+    private string? Fehlermeldung;
+
+    private bool FormularAnzeigen;
+    private bool Speichern;
+    private string? FormularFehler;
+
+    private BewegungsFormular Formular = new();
+
+    private class BewegungsFormular
+    {
+        public int ArtikelId { get; set; }
+        public Bewegungsart Bewegungsart { get; set; } = Bewegungsart.Eingang;
+        public int Menge { get; set; } = 1;
+        public string? Bemerkung { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await DatenLaden();
+    }
+
+    private async Task DatenLaden()
+    {
+        Laden = true;
+        Fehlermeldung = null;
+
+        try
+        {
+            ArtikelListe = await ArtikelService.GetAllAsync();
+            Bewegungen = await LagerbewegungService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            Fehlermeldung =
+                "Die Lagerdaten konnten nicht geladen werden.";
+        }
+        finally
+        {
+            Laden = false;
+        }
+    }
+
+    private void NeueBewegungOeffnen()
+    {
+        Formular = new BewegungsFormular();
+        FormularFehler = null;
+        FormularAnzeigen = true;
+    }
+
+    private void FormularSchliessen()
+    {
+        if (Speichern)
+            return;
+
+        FormularAnzeigen = false;
+        FormularFehler = null;
+    }
+
+    private async Task BewegungSpeichern()
+    {
+        if (Speichern)
+            return;
+
+        FormularFehler = null;
+
+        if (Formular.ArtikelId <= 0)
+        {
+            FormularFehler = "Bitte wählen Sie einen Artikel aus.";
+            return;
+        }
+
+        if (Formular.Menge <= 0)
+        {
+            FormularFehler = "Die Menge muss größer als 0 sein.";
+            return;
+        }
+
+        Speichern = true;
+
+        try
+        {
+            await LagerbewegungService.BuchenAsync(
+                Formular.ArtikelId,
+                Formular.Bewegungsart,
+                Formular.Menge,
+                Formular.Bemerkung);
+
+            FormularAnzeigen = false;
+            await DatenLaden();
+        }
+        catch (Exception ex)
+        {
+            FormularFehler =
+                ex is InvalidOperationException
+                    ? ex.Message
+                    : "Die Lagerbewegung konnte nicht gespeichert werden.";
+        }
+        finally
+        {
+            Speichern = false;
+        }
+    }
+}

@@ -1,0 +1,188 @@
+
+.brand-block {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 27px 22px;
+}
+
+.brand-mark {
+    width: 49px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    background: #c62828;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    transform: skew(-7deg);
+}
+
+.brand-name {
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.35;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+}
+
+.brand-name span {
+    display: block;
+    color: #aeb3bb;
+    font-size: 10px;
+    letter-spacing: 2.3px;
+    font-weight: 600;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.09);
+    margin: 0 20px 22px;
+}
+
+.main-navigation {
+    padding: 0 13px;
+}
+
+.nav-section-title {
+    color: #858b95;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    padding: 15px 12px 9px;
+}
+
+.menu-link {
+    color: #c4c8ce;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 43px;
+    padding: 0 12px;
+    margin: 3px 0;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.menu-icon {
+    width: 20px;
+    text-align: center;
+    font-size: 18px;
+    color: #aeb3bb;
+}
+
+::deep .menu-link.active {
+    color: #fff;
+    background: #383d45;
+    border-left: 3px solid #d32f2f;
+    padding-left: 9px;
+}
+
+::deep .menu-link.active .menu-icon {
+    color: #f06a6a;
+}
+
+::deep .menu-link:hover {
+    color: #fff;
+    background: #30353c;
+}
+
+.warehouse-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    margin: 5px 3px;
+    background: #292e35;
+    border: 1px solid #3a4049;
+    border-radius: 5px;
+}
+
+.warehouse-icon {
+    font-size: 20px;
+    color: #e16a6a;
+}
+
+.warehouse-info strong {
+    display: block;
+    color: #e4e6e9;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.warehouse-info small {
+    display: block;
+    color: #9299a3;
+    font-size: 10px;
+    margin-top: 3px;
+}
+
+.warehouse-indicator {
+    width: 7px;
+    height: 7px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: #5bb98a;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 18px 22px 22px;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    color: #b5bac2;
+    font-size: 10px;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: #5bb98a;
+}
+
+.sidebar-footer small {
+    display: block;
+    margin: 8px 0 0 14px;
+    color: #777e88;
+    font-size: 9px;
+    letter-spacing: 1px;
+}
+
+@media (max-width: 760px) {
+    .brand-block {
+        padding: 15px 18px;
+    }
+
+    .sidebar-divider,
+    .sidebar-footer {
+        display: none;
+    }
+
+    .main-navigation {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 0 10px 12px;
+    }
+
+    .nav-section-title {
+        display: none;
+    }
+
+    .menu-link {
+        min-height: 36px;
+        margin: 2px;
+        padding: 0 9px;
+        font-size: 11px;
+    }
+
+    .warehouse-info {
+        display: none;
+    }
+}

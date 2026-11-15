@@ -1,0 +1,520 @@
+
+@page "/artikel"
+@rendermode InteractiveServer
+
+@using FVD.PartsManager.Web.Models
+@using FVD.PartsManager.Web.Services
+@inject ArtikelService ArtikelService
+
+<PageTitle>Artikelverwaltung | FVD Parts Manager</PageTitle>
+
+<div class="page-header">
+    <div>
+        <div class="section-caption">WARENVERWALTUNG / HAUPTLAGER</div>
+        <h1>Artikelverwaltung</h1>
+        <p>Verwaltung der Porsche-Ersatzteile</p>
+    </div>
+
+    <button type="button"
+            class="btn btn-danger"
+            @onclick="NeuenArtikelOeffnen">
+        + Neuer Artikel
+    </button>
+</div>
+
+<div class="article-panel">
+    <div class="panel-toolbar">
+        <div class="search-wrapper">
+            <input class="form-control"
+                   type="search"
+                   placeholder="Artikelnummer oder Bezeichnung suchen..."
+                   aria-label="Artikel suchen"
+                   @bind="Suchtext"
+                   @bind:event="oninput" />
+        </div>
+
+        <span class="article-count">
+            @GefilterteArtikel.Count Artikel
+        </span>
+    </div>
+
+    @if (Laden)
+    {
+        <div class="state-message">
+            Artikel werden geladen...
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(Fehlermeldung))
+    {
+        <div class="alert alert-danger m-3">
+            @Fehlermeldung
+        </div>
+    }
+    else if (GefilterteArtikel.Count == 0)
+    {
+        <div class="state-message">
+            Keine Artikel gefunden.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Artikelnummer</th>
+                        <th>Bezeichnung</th>
+                        <th class="text-end">Bestand</th>
+                        <th class="text-end">Mindestbestand</th>
+                        <th>Status</th>
+                        <th class="text-end">Aktionen</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var artikel in GefilterteArtikel)
+                    {
+                        <tr @key="artikel.Id">
+                            <td class="article-number">
+                                @artikel.Artikelnummer
+                            </td>
+
+                            <td>@artikel.Bezeichnung</td>
+
+                            <td class="text-end">
+                                @artikel.Lagerbestand
+                            </td>
+
+                            <td class="text-end">
+                                @artikel.Mindestbestand
+                            </td>
+
+                            <td>
+                                @if (artikel.Lagerbestand <= artikel.Mindestbestand)
+                                {
+                                    <span class="badge bg-danger">
+                                        Niedriger Bestand
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">
+                                        Verfügbar
+                                    </span>
+                                }
+                            </td>
+
+                            <td class="text-end actions-cell">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        @onclick="() => ArtikelBearbeiten(artikel)">
+                                    Bearbeiten
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        @onclick="() => LoeschenOeffnen(artikel)">
+                                    Löschen
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@if (FormularAnzeigen)
+{
+    <div class="modal-overlay">
+        <div class="article-modal"
+             role="dialog"
+             aria-modal="true"
+             aria-label="Artikel bearbeiten">
+
+            <div class="modal-header-custom">
+                <h2>
+                    @(Bearbeitungsmodus
+                        ? "Artikel bearbeiten"
+                        : "Neuer Artikel")
+                </h2>
+
+                <button type="button"
+                        class="btn-close"
+                        aria-label="Schließen"
+                        disabled="@Speichern"
+                        @onclick="FormularSchliessen">
+                </button>
+            </div>
+
+            <EditForm Model="@FormularArtikel"
+                      OnValidSubmit="ArtikelSpeichern"
+                      FormName="ArtikelForm">
+
+                <div class="modal-body-custom">
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Artikelnummer *
+                        </label>
+
+                        <InputText class="form-control"
+                                   maxlength="50"
+                                   @bind-Value="FormularArtikel.Artikelnummer" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Bezeichnung *
+                        </label>
+
+                        <InputText class="form-control"
+                                   maxlength="250"
+                                   @bind-Value="FormularArtikel.Bezeichnung" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Beschreibung
+                        </label>
+
+                        <InputTextArea class="form-control"
+                                       rows="3"
+                                       maxlength="1000"
+                                       @bind-Value="FormularArtikel.Beschreibung" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Mindestbestand
+                        </label>
+
+                        <InputNumber class="form-control"
+                                     min="0"
+                                     @bind-Value="FormularArtikel.Mindestbestand" />
+                    </div>
+
+                    <div class="alert alert-secondary small">
+                        @if (Bearbeitungsmodus)
+                        {
+                            <span>
+                                Aktueller Lagerbestand:
+                                <strong>@FormularArtikel.Lagerbestand</strong>.
+                                Der Lagerbestand kann hier nicht geändert werden.
+                            </span>
+                        }
+                        else
+                        {
+                            <span>
+                                Der Anfangsbestand beträgt 0.
+                                Lagerbestände werden über Lagerbewegungen geändert.
+                            </span>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(FormularFehler))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @FormularFehler
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer-custom">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            disabled="@Speichern"
+                            @onclick="FormularSchliessen">
+                        Abbrechen
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-danger"
+                            disabled="@Speichern">
+                        @(Speichern
+                            ? "Speichern..."
+                            : Bearbeitungsmodus
+                                ? "Änderungen speichern"
+                                : "Artikel speichern")
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@if (ArtikelZumLoeschen is not null)
+{
+    <div class="modal-overlay">
+        <div class="article-modal delete-modal"
+             role="dialog"
+             aria-modal="true"
+             aria-label="Artikel löschen">
+
+            <div class="modal-header-custom">
+                <h2>Artikel löschen</h2>
+
+                <button type="button"
+                        class="btn-close"
+                        aria-label="Schließen"
+                        disabled="@LoeschenLaeuft"
+                        @onclick="LoeschenSchliessen">
+                </button>
+            </div>
+
+            <div class="modal-body-custom">
+                <p>
+                    Möchten Sie diesen Artikel wirklich löschen?
+                </p>
+
+                <div class="delete-article-info">
+                    <strong>@ArtikelZumLoeschen.Artikelnummer</strong>
+                    <span>@ArtikelZumLoeschen.Bezeichnung</span>
+                </div>
+
+                <p class="text-muted small">
+                    Diese Aktion kann nicht rückgängig gemacht werden.
+                    Artikel mit Lagerbewegungen können nicht gelöscht werden.
+                </p>
+
+                @if (!string.IsNullOrEmpty(LoeschenFehler))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @LoeschenFehler
+                    </div>
+                }
+            </div>
+
+            <div class="modal-footer-custom">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        disabled="@LoeschenLaeuft"
+                        @onclick="LoeschenSchliessen">
+                    Abbrechen
+                </button>
+
+                <button type="button"
+                        class="btn btn-danger"
+                        disabled="@LoeschenLaeuft"
+                        @onclick="ArtikelLoeschen">
+                    @(LoeschenLaeuft
+                        ? "Löschen..."
+                        : "Endgültig löschen")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Artikel> ArtikelListe = [];
+
+    private string Suchtext = string.Empty;
+    private string? Fehlermeldung;
+    private bool Laden = true;
+
+    private bool FormularAnzeigen;
+    private bool Bearbeitungsmodus;
+    private bool Speichern;
+    private string? FormularFehler;
+
+    private Artikel FormularArtikel = new();
+
+    private Artikel? ArtikelZumLoeschen;
+    private string? LoeschenFehler;
+    private bool LoeschenLaeuft;
+
+    private List<Artikel> GefilterteArtikel =>
+        ArtikelListe
+            .Where(a =>
+                string.IsNullOrWhiteSpace(Suchtext)
+                || a.Artikelnummer.Contains(
+                    Suchtext, StringComparison.OrdinalIgnoreCase)
+                || a.Bezeichnung.Contains(
+                    Suchtext, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ArtikelLaden();
+    }
+
+    private async Task ArtikelLaden()
+    {
+        Laden = true;
+        Fehlermeldung = null;
+
+        try
+        {
+            ArtikelListe = await ArtikelService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            Fehlermeldung =
+                "Die Artikel konnten nicht geladen werden. " +
+                "Bitte überprüfen Sie die Datenbankverbindung.";
+        }
+        finally
+        {
+            Laden = false;
+        }
+    }
+
+    private void NeuenArtikelOeffnen()
+    {
+        Bearbeitungsmodus = false;
+
+        FormularArtikel = new Artikel
+        {
+            Lagerbestand = 0,
+            Mindestbestand = 0
+        };
+
+        FormularFehler = null;
+        FormularAnzeigen = true;
+    }
+
+    private void ArtikelBearbeiten(Artikel artikel)
+    {
+        Bearbeitungsmodus = true;
+
+        // Änderungen werden erst beim Speichern übernommen.
+        FormularArtikel = new Artikel
+        {
+            Id = artikel.Id,
+            Artikelnummer = artikel.Artikelnummer,
+            Bezeichnung = artikel.Bezeichnung,
+            Beschreibung = artikel.Beschreibung,
+            Lagerbestand = artikel.Lagerbestand,
+            Mindestbestand = artikel.Mindestbestand
+        };
+
+        FormularFehler = null;
+        FormularAnzeigen = true;
+    }
+
+    private void FormularSchliessen()
+    {
+        if (Speichern)
+            return;
+
+        FormularAnzeigen = false;
+        FormularFehler = null;
+    }
+
+    private async Task ArtikelSpeichern()
+    {
+        if (Speichern)
+            return;
+
+        FormularFehler = null;
+
+        if (string.IsNullOrWhiteSpace(FormularArtikel.Artikelnummer)
+            || string.IsNullOrWhiteSpace(FormularArtikel.Bezeichnung))
+        {
+            FormularFehler =
+                "Artikelnummer und Bezeichnung sind erforderlich.";
+            return;
+        }
+
+        FormularArtikel.Artikelnummer =
+            FormularArtikel.Artikelnummer.Trim();
+
+        FormularArtikel.Bezeichnung =
+            FormularArtikel.Bezeichnung.Trim();
+
+        if (FormularArtikel.Artikelnummer.Length > 50
+            || FormularArtikel.Bezeichnung.Length > 250
+            || FormularArtikel.Beschreibung?.Length > 1000)
+        {
+            FormularFehler =
+                "Die maximale Feldlänge wurde überschritten.";
+            return;
+        }
+
+        if (FormularArtikel.Mindestbestand < 0)
+        {
+            FormularFehler =
+                "Der Mindestbestand darf nicht negativ sein.";
+            return;
+        }
+
+        Speichern = true;
+
+        try
+        {
+            if (Bearbeitungsmodus)
+            {
+                await ArtikelService.UpdateAsync(FormularArtikel);
+            }
+            else
+            {
+                // Neue Artikel beginnen immer mit Lagerbestand 0.
+                FormularArtikel.Lagerbestand = 0;
+
+                await ArtikelService.CreateAsync(FormularArtikel);
+            }
+
+            FormularAnzeigen = false;
+            await ArtikelLaden();
+        }
+        catch (Exception ex)
+        {
+            FormularFehler =
+                ex is InvalidOperationException or KeyNotFoundException
+                    ? ex.Message
+                    : "Der Artikel konnte nicht gespeichert werden.";
+
+            FormularAnzeigen = true;
+        }
+        finally
+        {
+            Speichern = false;
+        }
+    }
+
+    private void LoeschenOeffnen(Artikel artikel)
+    {
+        ArtikelZumLoeschen = artikel;
+        LoeschenFehler = null;
+    }
+
+    private void LoeschenSchliessen()
+    {
+        if (LoeschenLaeuft)
+            return;
+
+        ArtikelZumLoeschen = null;
+        LoeschenFehler = null;
+    }
+
+    private async Task ArtikelLoeschen()
+    {
+        if (ArtikelZumLoeschen is null || LoeschenLaeuft)
+            return;
+
+        LoeschenLaeuft = true;
+        LoeschenFehler = null;
+
+        try
+        {
+            await ArtikelService.DeleteAsync(ArtikelZumLoeschen.Id);
+
+            ArtikelZumLoeschen = null;
+            await ArtikelLaden();
+        }
+        catch (Exception ex)
+        {
+            LoeschenFehler =
+                ex is InvalidOperationException or KeyNotFoundException
+                    ? ex.Message
+                    : "Der Artikel konnte nicht gelöscht werden.";
+        }
+        finally
+        {
+            LoeschenLaeuft = false;
+        }
+    }
+}

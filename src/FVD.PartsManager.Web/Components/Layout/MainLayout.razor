@@ -1,0 +1,39 @@
+﻿
+@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <NavMenu />
+        <div class="sidebar-footer">
+            <span class="status-dot"></span>
+            <span>System betriebsbereit</span>
+            <small>DEMO VERSION 1.0</small>
+        </div>
+    </aside>
+
+    <div class="main-panel">
+        <header class="topbar">
+            <div class="topbar-caption">
+                FVD <span>/</span> WAREHOUSE MANAGEMENT
+            </div>
+            <div class="topbar-actions">
+                <span class="demo-label">DEMO SYSTEM</span>
+                <div class="user-avatar">VV</div>
+            </div>
+        </header>
+
+        <main class="content-area">
+            @Body
+        </main>
+
+        <footer class="app-footer">
+            FVD Parts Manager <span>·</span> Demonstrationsprojekt
+        </footer>
+    </div>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Ein unerwarteter Fehler ist aufgetreten.
+    <a href="." class="reload">Neu laden</a>
+    <span class="dismiss">🗙</span>
+</div>

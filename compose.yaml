@@ -1,0 +1,110 @@
+﻿
+name: fvd-partsmanager
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: fvd_partsmanager
+      POSTGRES_USER: fvd_app
+      POSTGRES_PASSWORD: ${FVD_DB_PASSWORD:?FVD_DB_PASSWORD is required}
+      PGDATA: /var/lib/postgresql/18/docker
+
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U fvd_app -d fvd_partsmanager
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+    networks:
+      - fvd_internal
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    restart: unless-stopped
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=fvd_partsmanager;Username=fvd_app;Password=${FVD_DB_PASSWORD:?FVD_DB_PASSWORD is required}"
+
+    ports:
+      - "127.0.0.1:8090:8080"
+
+    volumes:
+      - dataprotection_keys:/home/app/.aspnet/DataProtection-Keys
+
+    networks:
+      - fvd_internal
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    profiles:
+      - tools
+
+    restart: "no"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=fvd_partsmanager;Username=fvd_app;Password=${FVD_DB_PASSWORD:?FVD_DB_PASSWORD is required}"
+
+    command:
+      - "--migrate"
+
+    networks:
+      - fvd_internal
+
+  seed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    profiles:
+      - tools
+
+    restart: "no"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      DemoData__AllowSeeding: "true"
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=fvd_partsmanager;Username=fvd_app;Password=${FVD_DB_PASSWORD:?FVD_DB_PASSWORD is required}"
+
+    command:
+      - "--seed-demo"
+
+    networks:
+      - fvd_internal
+
+networks:
+  fvd_internal:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  dataprotection_keys:

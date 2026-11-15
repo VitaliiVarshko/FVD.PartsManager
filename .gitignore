@@ -1,0 +1,31 @@
+
+# .NET
+**/bin/
+**/obj/
+.vs/
+.vscode/
+.idea/
+
+# User-specific files
+*.user
+*.suo
+
+# Secrets and environment variables
+.env
+.env.*
+**/secrets.json
+**/appsettings.Development.json
+
+# Database backups
+*.backup
+*.bak
+*.dump
+*.sql
+
+# Logs
+*.log
+logs/
+
+# Operating system
+Thumbs.db
+.DS_Store

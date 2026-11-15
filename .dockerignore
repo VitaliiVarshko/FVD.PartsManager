@@ -1,0 +1,15 @@
+
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+.git/
+.gitignore
+.env
+.env.*
+*.backup
+*.bak
+*.sql
+**/secrets.json
+**/appsettings.Development.json

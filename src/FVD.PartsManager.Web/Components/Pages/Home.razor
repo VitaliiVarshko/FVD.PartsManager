@@ -1,0 +1,164 @@
+﻿
+@page "/"
+@rendermode InteractiveServer
+
+@using FVD.PartsManager.Web.Models
+@using FVD.PartsManager.Web.Services
+
+@inject ArtikelService ArtikelService
+@inject LagerbewegungService LagerbewegungService
+
+<PageTitle>Dashboard | FVD Parts Manager</PageTitle>
+
+<div class="dashboard-header">
+    <div>
+        <div class="section-caption">ÜBERSICHT / HAUPTLAGER</div>
+        <h1>Dashboard</h1>
+        <p>Aktuelle Bestandsübersicht und Lageraktivitäten</p>
+    </div>
+
+    <a href="/artikel" class="btn btn-danger">
+        Artikelverwaltung
+    </a>
+</div>
+
+@if (Laden)
+{
+    <div class="state-message">
+        Dashboard wird geladen...
+    </div>
+}
+else if (!string.IsNullOrEmpty(Fehlermeldung))
+{
+    <div class="alert alert-danger">
+        @Fehlermeldung
+    </div>
+}
+else
+{
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-label">ARTIKEL GESAMT</div>
+            <div class="stat-value">@ArtikelListe.Count</div>
+            <div class="stat-description">Artikel im Hauptlager</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">LAGERBESTAND GESAMT</div>
+            <div class="stat-value">@Gesamtbestand</div>
+            <div class="stat-description">Stück über alle Artikel</div>
+        </div>
+
+        <div class="stat-card stat-card-warning">
+            <div class="stat-label">KRITISCHE BESTÄNDE</div>
+            <div class="stat-value">@KritischeArtikel</div>
+            <div class="stat-description">Artikel am oder unter Mindestbestand</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">LAGERBEWEGUNGEN</div>
+            <div class="stat-value">@Bewegungen.Count</div>
+            <div class="stat-description">Erfasste Buchungen</div>
+        </div>
+    </div>
+
+    <div class="dashboard-panel">
+        <div class="panel-heading">
+            <div>
+                <h2>Letzte Lagerbewegungen</h2>
+                <p>Die fünf zuletzt erfassten Buchungen</p>
+            </div>
+
+            <a href="/lagerbewegungen" class="panel-link">
+                Alle Bewegungen anzeigen
+            </a>
+        </div>
+
+        @if (Bewegungen.Count == 0)
+        {
+            <div class="state-message">
+                Noch keine Lagerbewegungen vorhanden.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>Artikelnummer</th>
+                            <th>Bezeichnung</th>
+                            <th>Bewegungsart</th>
+                            <th class="text-end">Menge</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bewegung in Bewegungen.Take(5))
+                        {
+                            <tr @key="bewegung.Id">
+                                <td>
+                                    @bewegung.Datum.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                                </td>
+                                <td class="article-number">
+                                    @bewegung.Artikel.Artikelnummer
+                                </td>
+                                <td>@bewegung.Artikel.Bezeichnung</td>
+                                <td>
+                                    @if (bewegung.Bewegungsart == Bewegungsart.Eingang)
+                                    {
+                                        <span class="badge bg-success">
+                                            Wareneingang
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            Warenausgang
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-end fw-bold">
+                                    @(bewegung.Bewegungsart == Bewegungsart.Eingang ? "+" : "-")@bewegung.Menge
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Artikel> ArtikelListe = [];
+    private List<Lagerbewegung> Bewegungen = [];
+
+    private bool Laden = true;
+    private string? Fehlermeldung;
+
+    private long Gesamtbestand =>
+        ArtikelListe.Sum(a => (long)a.Lagerbestand);
+
+    private int KritischeArtikel =>
+        ArtikelListe.Count(a =>
+            a.Lagerbestand <= a.Mindestbestand);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            ArtikelListe = await ArtikelService.GetAllAsync();
+            Bewegungen = await LagerbewegungService.GetAllAsync();
+        }
+        catch (Exception)
+        {
+            Fehlermeldung =
+                "Die Dashboard-Daten konnten nicht geladen werden.";
+        }
+        finally
+        {
+            Laden = false;
+        }
+    }
+}

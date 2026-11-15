@@ -1,14 +1,14 @@
-﻿# FVD Parts Manager
+# FVD Parts Manager
 
-**Webbasierte Lagerverwaltung fГјr Ersatzteile вЂ“ entwickelt mit ASP.NET Core 10, Blazor, Entity Framework Core und PostgreSQL 18.**
+**Webbasierte Lagerverwaltung für Ersatzteile – entwickelt mit ASP.NET Core 10, Blazor, Entity Framework Core und PostgreSQL 18.**
 
-Dieses Projekt ist eine eigenstГ¤ndig entwickelte Demo-Anwendung zur Verwaltung von Ersatzteilen und Lagerbewegungen. Es demonstriert die Umsetzung typischer ERP-Funktionen вЂ“ von der Datenmodellierung und GeschГ¤ftslogik bis zur Bereitstellung auf einem Linux-Server.
+Dieses Projekt ist eine eigenständig entwickelte Demo-Anwendung zur Verwaltung von Ersatzteilen und Lagerbewegungen. Es demonstriert die Umsetzung typischer ERP-Funktionen – von der Datenmodellierung und Geschäftslogik bis zur Bereitstellung auf einem Linux-Server.
 
 ## Live-Demo
 
-**[FVD Parts Manager online Г¶ffnen](https://fvd-partsmanager.178.105.105.251.sslip.io/)**
+**[FVD Parts Manager online öffnen](https://fvd-partsmanager.178.105.105.251.sslip.io/)**
 
-Die Anwendung lГ¤uft auf einem Hetzner-Server und ist Гјber HTTPS erreichbar. Der Zugriff ist durch HTTP Basic Authentication geschГјtzt. Die Zugangsdaten werden auf Anfrage zur VerfГјgung gestellt.
+Die Anwendung läuft auf einem Hetzner-Server und ist über HTTPS erreichbar. Der Zugriff ist durch HTTP Basic Authentication geschützt. Die Zugangsdaten werden auf Anfrage zur Verfügung gestellt.
 
 ## Screenshots
 
@@ -16,7 +16,7 @@ Die Anwendung lГ¤uft auf einem Hetzner-Server und ist Гјber HTTPS erreichbar
 
 ![Dashboard](docs/screenshots/01-dashboard.png)
 
-Гњbersicht Гјber Lagerkennzahlen, kritische BestГ¤nde und aktuelle Lagerbewegungen.
+Übersicht über Lagerkennzahlen, kritische Bestände und aktuelle Lagerbewegungen.
 
 ### Artikelverwaltung
 
@@ -28,15 +28,15 @@ Verwaltung von Ersatzteilen mit Artikelnummer, Bezeichnung, Lagerbestand und Min
 
 ![Lagerbewegungen](docs/screenshots/03-lagerbewegungen.png)
 
-Erfassung und Гњbersicht von WareneingГ¤ngen und WarenausgГ¤ngen.
+Erfassung und Übersicht von Wareneingängen und Warenausgängen.
 
 ## Funktionen
 
 - **Dashboard:** Aktuelle Lagerkennzahlen, Mindestbestandswarnungen und letzte Lagerbewegungen.
-- **Artikelverwaltung:** Artikel anlegen, anzeigen, bearbeiten und lГ¶schen.
-- **Lagerbewegungen:** WareneingГ¤nge und WarenausgГ¤nge erfassen und dokumentieren.
-- **BestandsfГјhrung:** Automatische Aktualisierung der LagerbestГ¤nde bei Buchungen.
-- **DatenintegritГ¤t:** Transaktionsbasierte Verarbeitung von Lagerbewegungen.
+- **Artikelverwaltung:** Artikel anlegen, anzeigen, bearbeiten und löschen.
+- **Lagerbewegungen:** Wareneingänge und Warenausgänge erfassen und dokumentieren.
+- **Bestandsführung:** Automatische Aktualisierung der Lagerbestände bei Buchungen.
+- **Datenintegrität:** Transaktionsbasierte Verarbeitung von Lagerbewegungen.
 - **Demo-Daten:** Reproduzierbare Initialisierung mit Beispielartikeln und Lagerbewegungen.
 - **Datenbankmigrationen:** Versionsverwaltung des Datenbankschemas mit EF Core Migrations.
 
@@ -45,7 +45,7 @@ Erfassung und Гњbersicht von WareneingГ¤ngen und WarenausgГ¤ngen.
 | Bereich | Technologie |
 |---|---|
 | Backend | C#, .NET 10, ASP.NET Core |
-| BenutzeroberflГ¤che | Blazor Web App, Razor Components, Bootstrap |
+| Benutzeroberfläche | Blazor Web App, Razor Components, Bootstrap |
 | Datenzugriff | Entity Framework Core 10 |
 | Datenbank | PostgreSQL 18 |
 | Containerisierung | Docker, Docker Compose |
@@ -58,12 +58,12 @@ Erfassung und Гњbersicht von WareneingГ¤ngen und WarenausgГ¤ngen.
 
 Die Anwendung ist in mehrere Schichten gegliedert:
 
-- **Components:** Blazor-Komponenten fГјr die BenutzeroberflГ¤che.
-- **Services:** GeschГ¤ftslogik fГјr Artikelverwaltung und Lagerbewegungen.
-- **Models:** Datenmodelle fГјr Artikel und Lagerbewegungen.
+- **Components:** Blazor-Komponenten für die Benutzeroberfläche.
+- **Services:** Geschäftslogik für Artikelverwaltung und Lagerbewegungen.
+- **Models:** Datenmodelle für Artikel und Lagerbewegungen.
 - **Data:** Entity Framework Core DbContext, Migrationen und Demo-Daten.
 
-Die Kommunikation mit der Datenbank erfolgt Гјber Entity Framework Core und den PostgreSQL-Provider.
+Die Kommunikation mit der Datenbank erfolgt über Entity Framework Core und den PostgreSQL-Provider.
 
 ### Deployment-Architektur
 
@@ -86,7 +86,7 @@ Docker: PostgreSQL 18
 Persistentes Docker Volume
 ```
 
-Die PostgreSQL-Datenbank ist nicht direkt Гјber einen Г¶ffentlichen Port erreichbar.
+Die PostgreSQL-Datenbank ist nicht direkt über einen öffentlichen Port erreichbar.
 
 ## Lokale Entwicklung
 
@@ -103,7 +103,7 @@ git clone https://github.com/VitaliiVarshko/FVD.PartsManager.git
 cd FVD.PartsManager
 ```
 
-Die lokale PostgreSQL-Verbindung Гјber die Konfiguration oder .NET User Secrets einrichten. Zugangsdaten dГјrfen nicht im Repository gespeichert werden.
+Die lokale PostgreSQL-Verbindung über die Konfiguration oder .NET User Secrets einrichten. Zugangsdaten dürfen nicht im Repository gespeichert werden.
 
 Anwendung starten:
 
@@ -123,7 +123,7 @@ Die Datei `compose.yaml` definiert folgende Dienste:
 | `migrate` | EF-Core-Datenbankmigrationen |
 | `seed` | Initialisierung der Demo-Daten |
 
-Vor dem Start muss die Umgebungsvariable `FVD_DB_PASSWORD` gesetzt werden, beispielsweise Гјber eine lokale `.env`-Datei, die nicht versioniert wird.
+Vor dem Start muss die Umgebungsvariable `FVD_DB_PASSWORD` gesetzt werden, beispielsweise über eine lokale `.env`-Datei, die nicht versioniert wird.
 
 Datenbank starten:
 
@@ -149,25 +149,25 @@ Webanwendung starten:
 docker compose up -d web
 ```
 
-Der Webdienst ist standardmГ¤Гџig unter `127.0.0.1:8090` erreichbar. FГјr den Г¶ffentlichen Zugriff wird ein separater Reverse Proxy mit HTTPS verwendet.
+Der Webdienst ist standardmäßig unter `127.0.0.1:8090` erreichbar. Für den öffentlichen Zugriff wird ein separater Reverse Proxy mit HTTPS verwendet.
 
 ## Sicherheit
 
-- Keine PasswГ¶rter oder ZugangsschlГјssel im Repository.
-- Datenbankzugriff ausschlieГџlich Гјber das interne Docker-Netzwerk.
-- Webcontainer wird ohne Root-Rechte ausgefГјhrt.
-- HTTPS-Terminierung Гјber Nginx.
-- Passwortschutz fГјr die Г¶ffentliche Demo Гјber Nginx.
-- Persistente Docker Volumes fГјr Datenbank und ASP.NET Core Data Protection Keys.
+- Keine Passwörter oder Zugangsschlüssel im Repository.
+- Datenbankzugriff ausschließlich über das interne Docker-Netzwerk.
+- Webcontainer wird ohne Root-Rechte ausgeführt.
+- HTTPS-Terminierung über Nginx.
+- Passwortschutz für die öffentliche Demo über Nginx.
+- Persistente Docker Volumes für Datenbank und ASP.NET Core Data Protection Keys.
 
 ## Projektziel
 
-Das Projekt wurde als praxisnahes Portfolio-Beispiel entwickelt, um Kenntnisse in der **Entwicklung datenbankgestГјtzter Webanwendungen**, in der **ERP-GeschГ¤ftslogik** sowie im **Deployment moderner .NET-Anwendungen unter Linux** zu demonstrieren.
+Das Projekt wurde als praxisnahes Portfolio-Beispiel entwickelt, um Kenntnisse in der **Entwicklung datenbankgestützter Webanwendungen**, in der **ERP-Geschäftslogik** sowie im **Deployment moderner .NET-Anwendungen unter Linux** zu demonstrieren.
 
-Es handelt sich um ein unabhГ¤ngiges Demonstrationsprojekt und nicht um ein offizielles Produkt der FVD Brombacher GmbH.
+Es handelt sich um ein unabhängiges Demonstrationsprojekt und nicht um ein offizielles Produkt der FVD Brombacher GmbH.
 
 ## Autor
 
 **Vitalii Varshko**
 
-Softwareentwickler mit Schwerpunkt Backend-Entwicklung, ERP-Integration und datenbankgestГјtzte GeschГ¤ftsanwendungen.
+Softwareentwickler mit Schwerpunkt Backend-Entwicklung, ERP-Integration und datenbankgestützte Geschäftsanwendungen.
